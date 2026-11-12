@@ -1,5 +1,5 @@
 @echo off
-title Coqui TTS Web UI
+title Akasavani
 cd /d "%~dp0"
 ".venv\Scripts\python.exe" "start_webui.py"
 echo.

@@ -1,7 +1,7 @@
-HOW TO START THE COQUI TTS WEB UI
-=================================
+HOW TO START AKASAVANI
+======================
 
-1. Open this folder:   D:\svb01\coqui-tts
+1. Open this folder:   D:\svb01\akasavani
 2. Double-click:       Start Web UI.bat
 3. A black window opens and your browser opens by itself.
    (If it doesn't open, go to:  http://localhost:5002 )
@@ -19,7 +19,7 @@ IF THE FOLDER IS MOVED OR THE ENVIRONMENT IS MISSING
 ------------------------------------------------------------
 The big ".venv" folder is NOT inside this backup (it was 4.79 GB and does
 not move between computers). If it is missing, rebuild it once with these
-commands (run them in the coqui-tts folder):
+commands (run them in the akasavani folder):
 
   uv venv --python 3.11 ".venv"
   uv pip install --python ".venv\Scripts\python.exe" torch==2.4.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu121

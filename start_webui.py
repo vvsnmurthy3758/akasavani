@@ -23,9 +23,11 @@ URL = f"http://{HOST}:{PORT}/"
 # The speed slider (0-3x) is added by patching two files inside the installed
 # TTS package. We keep patched copies in "patches" and re-apply them on every
 # start, so the slider keeps working even after a reinstall/update.
+SITE = HERE / ".venv" / "Lib" / "site-packages" / "TTS" / "server"
 PATCH_TARGETS = {
-    HERE / "patches" / "server.py": HERE / ".venv" / "Lib" / "site-packages" / "TTS" / "server" / "server.py",
-    HERE / "patches" / "index.html": HERE / ".venv" / "Lib" / "site-packages" / "TTS" / "server" / "templates" / "index.html",
+    HERE / "patches" / "server.py": SITE / "server.py",
+    HERE / "patches" / "index.html": SITE / "templates" / "index.html",
+    HERE / "patches" / "logo.png": SITE / "static" / "logo.png",
 }
 
 # Some models (like vctk/vits) need espeak-ng. Make sure the server can find it.
@@ -76,7 +78,7 @@ def apply_patches():
         try:
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(src, dst)
-            print(f"  applied speed-control patch: {dst.name}")
+            print(f"  applied patch: {dst.name}")
         except OSError as exc:
             print(f"  could not apply patch {dst.name}: {exc}")
 

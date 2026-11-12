@@ -6,12 +6,16 @@
   <title>Akasavani — local text-to-speech with a speed slider</title>
   <meta name="description" content="Akasavani (आकाशवाणी) — a friendly, local text-to-speech studio built on Coqui TTS. Pick a voice, set the speed from 0 to 3x, and generate speech in your browser." />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗣️</text></svg>" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/logo.png" />
 </head>
 <body>
   <header class="nav">
     <div class="wrap nav-inner">
-      <span class="brand">🗣️ Akasavani</span>
+      <a class="brand" href="#top">
+        <img src="assets/logo.png" alt="Akasavani logo" width="28" height="28" />
+        <span>Akasavani</span>
+      </a>
       <nav class="nav-links">
         <a href="#demo">Listen</a>
         <a href="#preview">Preview</a>
@@ -23,8 +27,9 @@
   </header>
 
   <main>
-    <section class="hero">
+    <section class="hero" id="top">
       <div class="wrap">
+        <img class="hero-logo" src="assets/logo.png" alt="Akasavani logo" width="104" height="104" />
         <p class="eyebrow">आकाशवाणी · “voice from the sky” · runs on your own machine</p>
         <h1>Text to speech,<br />with a speed slider.</h1>
         <p class="lead">

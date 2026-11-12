@@ -1,7 +1,7 @@
 services:
   tts:
     build: .
-    image: coqui-tts-webui
+    image: akasavani-webui
     ports:
       - "5002:5002"
     environment:

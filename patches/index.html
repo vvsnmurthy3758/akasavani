@@ -10,6 +10,8 @@
 
     <title>Akasavani</title>
 
+    <link rel="icon" type="image/png" href="{{url_for('static', filename='logo.png')}}">
+
     <!-- Bootstrap core CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
         integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous"
@@ -25,6 +27,12 @@
             font-weight: 700;
             letter-spacing: 0.3px;
             margin-bottom: 0;
+        }
+
+        .brand-logo {
+            display: block;
+            margin: 0 auto 0.75rem;
+            border-radius: 18px;
         }
 
         .brand-sub {
@@ -55,7 +63,9 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12 text-center">
-                <h1 class="brand-title mt-4">🗣️ Akasavani</h1>
+                <img class="brand-logo mt-4" src="{{url_for('static', filename='logo.png')}}" alt="Akasavani logo"
+                    width="140" height="140">
+                <h1 class="brand-title">Akasavani</h1>
                 <p class="brand-sub">आकाशवाणी · “voice from the sky” · runs on your machine</p>
 
                 {%if use_gst%}
