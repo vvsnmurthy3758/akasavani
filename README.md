@@ -1,6 +1,10 @@
-# 🗣️ Akasavani
+<p align="center">
+  <img src="docs/assets/logo.png" alt="Akasavani logo" width="170" height="170">
+</p>
 
-**आकाशवाणी** — *"voice from the sky."*
+<h1 align="center">Akasavani</h1>
+
+<p align="center"><strong>आकाशवाणी</strong> — <em>“voice from the sky.”</em></p>
 
 A friendly, **local** text-to-speech studio built on [Coqui TTS](https://github.com/idiap/coqui-ai-TTS).
 Type your text, pick a voice, set the **speed from 0 to 3×**, and hear it — all on your own machine.
