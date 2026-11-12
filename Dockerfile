@@ -2,9 +2,11 @@
 FROM python:3.11-slim
 
 # espeak-ng is required by several Coqui models (e.g. tts_models/en/vctk/vits).
+# libgomp1 is needed by onnxruntime (the Piper Telugu engine).
 # build-essential is needed if a dependency has to compile from source.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         espeak-ng \
+        libgomp1 \
         build-essential \
         git \
         libsndfile1 \

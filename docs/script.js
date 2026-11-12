@@ -7,6 +7,8 @@
   var text = document.getElementById("mock-text");
   var speaker = document.getElementById("mock-speaker");
   var enVoice = document.getElementById("mock-en-voice");
+  var teVoice = document.getElementById("mock-telugu-voice");
+  var teVoiceRow = document.getElementById("mock-te-voice");
   var speed = document.getElementById("mock-speed");
   var speedValue = document.getElementById("mock-speed-value");
   var speakBtn = document.getElementById("mock-speak");
@@ -18,9 +20,18 @@
     te: "\u0C28\u0C2E\u0C38\u0C4D\u0C15\u0C3E\u0C30\u0C02! \u0C07\u0C26\u0C3F \u0C06\u0C15\u0C3E\u0C36\u0C35\u0C3E\u0C23\u0C3F."
   };
 
+  var TELUGU_CLIPS = {
+    padmavathi: "assets/sample-telugu.mp3",
+    venkatesh: "assets/sample-telugu-venkatesh.mp3",
+    maya: "assets/sample-telugu-maya.mp3"
+  };
+
   function clipFor(langCode, spk, value) {
     if (langCode === "te") {
-      return value < 0.85 ? "assets/sample-telugu-slow.mp3" : "assets/sample-telugu.mp3";
+      if (value < 0.85 && teVoice.value === "padmavathi") {
+        return "assets/sample-telugu-slow.mp3";
+      }
+      return TELUGU_CLIPS[teVoice.value] || TELUGU_CLIPS.padmavathi;
     }
     if (spk === "b") return "assets/sample-voice2.mp3";
     if (value < 0.85) return "assets/sample-slow.mp3";
@@ -31,6 +42,7 @@
   lang.addEventListener("change", function () {
     var isTe = lang.value === "te";
     enVoice.style.display = isTe ? "none" : "";
+    teVoiceRow.style.display = isTe ? "" : "none";
     text.value = SAMPLES[isTe ? "te" : "en"];
   });
 

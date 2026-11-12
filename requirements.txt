@@ -10,9 +10,13 @@ torch==2.4.1
 torchaudio==2.4.1
 
 # --- Telugu (తెలుగు) support ------------------------------------------------
-# The Telugu voice (facebook/mms-tts-tel) and the optional IndicF5 engine run on
-# Hugging Face transformers. These pins keep it compatible with torch 2.4.1:
-# transformers 5.x requires torch>=2.6, which would break the CUDA 12.1 build.
+# The default Telugu engine is Piper (three native Telugu voices, 22 kHz, no
+# login, fast on CPU). It only needs onnxruntime, which piper-tts pulls in.
+piper-tts>=1.8
+# The alternative Telugu voices (facebook/mms-tts-tel and the optional IndicF5
+# engine) run on Hugging Face transformers. These pins keep it compatible with
+# torch 2.4.1: transformers 5.x requires torch>=2.6, which would break the
+# CUDA 12.1 build.
 transformers==4.57.1
 huggingface-hub==0.36.2
 tokenizers==0.22.2

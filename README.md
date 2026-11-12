@@ -25,7 +25,7 @@ No cloud, no API keys, no per-character fees.
 ## ✨ Features
 
 - **🎚️ Speed control (0–3×)** — slow down fast talkers or speed up long reads. Maps to the model's length scale, so it works for VITS *and* XTTS.
-- **🗣️ English & తెలుగు (Telugu)** — a curated set of English voices from `tts_models/en/vctk/vits`, plus native **Telugu** synthesis, picked from a single dropdown. Set `AKASAVANI_ALL_SPEAKERS=1` to unlock all ~109 English voices.
+- **🗣️ English & తెలుగు (Telugu)** — a curated set of English voices from `tts_models/en/vctk/vits`, plus native **Telugu** synthesis with three voices (Padmavathi, Venkatesh, Maya), picked from a single dropdown. Set `AKASAVANI_ALL_SPEAKERS=1` to unlock all ~109 English voices.
 - **🖱️ One double-click** (Windows) — `Start Web UI.bat` starts the server and opens your browser.
 - **🔒 100% local** — your text never leaves your machine.
 - **🧩 REST API** — includes an OpenAI-compatible `/v1/audio/speech` endpoint for scripting.
@@ -91,17 +91,33 @@ The chosen value is sent to the server as `speed`. For models that don't accept 
 
 ## 🗣️ English & తెలుగు (Telugu)
 
-The web UI has a **Language** dropdown:
+The web UI has a **Language** dropdown; picking తెలుగు swaps the English voice list
+for a Telugu voice list.
 
 | Language | Engine | Notes |
 |----------|--------|-------|
 | English | Coqui `tts_models/en/vctk/vits` | 10 curated voices (all ~109 with `AKASAVANI_ALL_SPEAKERS=1`) |
-| తెలుగు (Telugu) | `facebook/mms-tts-tel` | Single voice, ~145 MB, no login required |
+| తెలుగు (Telugu) | [Piper](https://github.com/OHF-Voice/piper1-gpl) | **Three voices** — Padmavathi, Venkatesh, Maya — 22 kHz, ~63 MB each, no login, fast on CPU |
 
 > **Why a second engine?** Coqui's model zoo has **no Telugu model**, so Telugu is
-> served by a small backend in [`patches/telugu_tts.py`](patches/telugu_tts.py) that
-> runs on Hugging Face `transformers`. The first Telugu request downloads the voice
-> (~145 MB); after that it is fully offline. The speed slider works for Telugu too.
+> served by a small backend in [`patches/telugu_tts.py`](patches/telugu_tts.py). The
+> default engine is **Piper**: pick a voice in the dropdown and the first request
+> downloads it (~63 MB); after that it is fully offline. The speed slider works for
+> Telugu too (Piper controls tempo through `length_scale`).
+
+### Telugu engines
+
+Choose with `AKASAVANI_TELUGU_ENGINE`:
+
+| Value | Engine | Voices | Login? | Notes |
+|-------|--------|--------|--------|-------|
+| `piper` *(default)* | `rhasspy/piper-voices` (`te_IN`) | 3 | No | Recommended: fast, 22 kHz, ~63 MB per voice |
+| `mms` | `facebook/mms-tts-tel` | 1 | No | Single voice, ~145 MB, CC-BY-NC-4.0 |
+| `indicf5` | `ai4bharat/IndicF5` | clone | **Yes** | Best quality; gated, needs a reference clip |
+
+With `AKASAVANI_TELUGU_ENGINE=auto` (the default), Akasavani prefers IndicF5 when it
+is fully configured, otherwise Piper, and finally falls back to MMS. Set the default
+Piper voice with `AKASAVANI_TELUGU_VOICE=padmavathi|venkatesh|maya`.
 
 ### Optional: the IndicF5 engine (best quality)
 
@@ -120,10 +136,6 @@ natural Telugu, but it is a **gated** voice-cloning model and needs a reference 
 
 4. Restart the UI.
 
-With `AKASAVANI_TELUGU_ENGINE=auto` (the default), Akasavani uses IndicF5 whenever a
-reference clip, its transcript **and** a Hugging Face token are all present, and
-otherwise falls back to the always-available MMS voice.
-
 ---
 
 ## 🧩 REST API
@@ -139,7 +151,8 @@ curl -X POST http://localhost:5002/v1/audio/speech \
 
 Supported `response_format`: `wav`, `mp3`, `opus`, `aac`, `flac`, `pcm`.
 
-Add `"language": "te"` to speak Telugu (default is `"en"`).
+Add `"language": "te"` to speak Telugu (default is `"en"`). For Telugu, `voice`
+selects the Piper voice, e.g. `"voice": "venkatesh"`.
 
 ---
 
@@ -169,7 +182,9 @@ Copy `.env.example` to `.env` and adjust:
 | `PORT` | `5002` | HTTP port |
 | `COQUI_TOS_AGREED` | `1` | Accept Coqui model terms (required non-interactively) |
 | `AKASAVANI_TELUGU` | `1` | Enable the Telugu option in the UI |
-| `AKASAVANI_TELUGU_ENGINE` | `auto` | `auto`, `mms` or `indicf5` |
+| `AKASAVANI_TELUGU_ENGINE` | `auto` | `auto`, `piper`, `mms` or `indicf5` |
+| `AKASAVANI_TELUGU_VOICE` | `padmavathi` | Default Piper voice: `padmavathi`, `venkatesh` or `maya` |
+| `AKASAVANI_PIPER_DIR` | `~/.cache/akasavani/piper` | Where Piper stores downloaded voices |
 | `AKASAVANI_ALL_SPEAKERS` | *(unset)* | `1` shows all ~109 English voices |
 | `INDICF5_REF_AUDIO` | *(unset)* | Reference clip for the IndicF5 engine |
 | `INDICF5_REF_TEXT` | *(unset)* | Transcript of that reference clip |
@@ -181,6 +196,7 @@ Copy `.env.example` to `.env` and adjust:
 - **This project:** MPL-2.0 — see [LICENSE](LICENSE).
 - **Coqui TTS code:** MPL-2.0, maintained fork by the Idiap Research Institute (`idiap/coqui-ai-TTS`).
 - **`vctk/vits` model:** Apache-2.0 (commercial use OK).
+- **Piper** (default Telugu engine): engine GPL-3.0; the `te_IN` voices are trained on CC-BY-4.0 data (`ai4bharat/indicvoices_r`).
 - **MMS-TTS Telugu** (`facebook/mms-tts-tel`): CC-BY-NC-4.0 (non-commercial).
 - **IndicF5** (optional Telugu engine): MIT.
 - **XTTS-v2** (if you add voice cloning): non-commercial only (Coqui Public Model License).

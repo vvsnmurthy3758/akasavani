@@ -27,12 +27,14 @@ from TTS.utils.manage import ModelManager
 
 # Telugu is served by a separate backend because Coqui has no Telugu model.
 try:
-    from .telugu_tts import TeluguTTS
+    from . import telugu_tts as _telugu_mod
 except ImportError:  # running as a plain script
     try:
-        from telugu_tts import TeluguTTS
+        import telugu_tts as _telugu_mod
     except ImportError:
-        TeluguTTS = None
+        _telugu_mod = None
+
+TeluguTTS = getattr(_telugu_mod, "TeluguTTS", None)
 
 logger = logging.getLogger(__name__)
 
@@ -196,6 +198,8 @@ def index():
         if curated:
             speaker_ids = [sid for sid, _ in curated]
             speaker_labels = dict(curated)
+    telugu_voices = _telugu_mod.piper_voice_options() if _telugu_mod is not None else []
+    telugu_default_voice = getattr(_telugu_mod, "PIPER_DEFAULT_VOICE", "padmavathi")
     return render_template(
         "index.html",
         show_details=args.show_details,
@@ -207,6 +211,8 @@ def index():
         use_gst=use_gst,
         supports_cloning=api.synthesizer.tts_config.supports_cloning,
         telugu_enabled=TELUGU_ENABLED and TeluguTTS is not None,
+        telugu_voices=telugu_voices,
+        telugu_default_voice=telugu_default_voice,
     )
 
 
@@ -265,12 +271,13 @@ def tts():
         # Telugu (తెలుగు) is served by a separate backend, since Coqui has no
         # Telugu model. Everything else falls through to the Coqui model below.
         lang = (request.headers.get("lang") or request.values.get("lang", "en") or "en").strip().lower()
+        voice = request.headers.get("voice") or request.values.get("voice", "")
         if lang in ("te", "tel", "telugu"):
             telugu = get_telugu()
             if telugu is None:
                 return {"error": "Telugu support is not available on this server."}, 503
             try:
-                wav, sample_rate = telugu.synthesize(text, speed)
+                wav, sample_rate = telugu.synthesize(text, speed, voice)
             except ValueError as e:
                 return {"error": str(e)}, 400
             except Exception as e:
@@ -426,7 +433,7 @@ def openai_tts():
             if telugu is None:
                 return {"error": "Telugu support is not available on this server."}, 503
             try:
-                wav, sample_rate = telugu.synthesize(text, speed)
+                wav, sample_rate = telugu.synthesize(text, speed, payload.get("voice"))
             except ValueError as e:
                 return {"error": str(e)}, 400
             out = io.BytesIO()
