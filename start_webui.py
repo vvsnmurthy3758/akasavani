@@ -50,7 +50,8 @@ def server_ready() -> bool:
             with urllib.request.urlopen(f"http://{host}:{PORT}/", timeout=2) as resp:
                 if resp.status < 500:
                     return True
-        except Exception:
+        except OSError:
+            # Connection refused / not up yet (URLError is an OSError subclass).
             continue
     return False
 

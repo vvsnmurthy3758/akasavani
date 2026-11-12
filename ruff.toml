@@ -6,3 +6,10 @@ exclude = [
     "patches",   # derived from coqui-tts (MPL-2.0), kept as-is
     "docs",
 ]
+
+[lint]
+# Pin an explicit, stable rule set: ruff's built-in defaults change between
+# releases, and we don't want CI to start failing on a linter upgrade.
+#   E4/E7/E9 = pycodestyle import + statement + runtime errors
+#   F        = pyflakes (unused imports/vars, undefined names, ...)
+select = ["E4", "E7", "E9", "F"]
