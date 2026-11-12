@@ -11,6 +11,7 @@ from pathlib import Path
 from threading import Lock
 from urllib.parse import parse_qs
 
+import soundfile as sf
 import torch
 import torchaudio
 
@@ -24,7 +25,55 @@ from TTS.api import TTS
 from TTS.utils.generic_utils import ConsoleFormatter, setup_logger
 from TTS.utils.manage import ModelManager
 
+# Telugu is served by a separate backend because Coqui has no Telugu model.
+try:
+    from .telugu_tts import TeluguTTS
+except ImportError:  # running as a plain script
+    try:
+        from telugu_tts import TeluguTTS
+    except ImportError:
+        TeluguTTS = None
+
 logger = logging.getLogger(__name__)
+
+# A short, curated set of English voices so the dropdown is not overwhelming.
+# Set AKASAVANI_ALL_SPEAKERS=1 to expose the model's full speaker list instead.
+CURATED_SPEAKERS = [
+    ("p225", "Female 1"),
+    ("p226", "Male 1"),
+    ("p227", "Male 2"),
+    ("p228", "Female 2"),
+    ("p232", "Male 3"),
+    ("p237", "Male 4"),
+    ("p248", "Female 3"),
+    ("p254", "Female 4"),
+    ("p260", "Male 5"),
+    ("p261", "Female 5"),
+]
+
+# Telugu support can be switched off entirely with AKASAVANI_TELUGU=0.
+TELUGU_ENABLED = os.environ.get("AKASAVANI_TELUGU", "1").strip().lower() not in ("0", "false", "no", "off")
+_telugu = None
+_telugu_lock = Lock()
+
+
+def get_telugu():
+    """Return a lazily-created Telugu backend, or None if it is unavailable."""
+    global _telugu
+    if not TELUGU_ENABLED or TeluguTTS is None:
+        return None
+    with _telugu_lock:
+        if _telugu is None:
+            try:
+                _telugu = TeluguTTS()
+            except Exception:
+                logger.exception("Could not initialise the Telugu engine")
+                return None
+    return _telugu
+
+
+def _use_all_speakers() -> bool:
+    return os.environ.get("AKASAVANI_ALL_SPEAKERS", "").strip().lower() in ("1", "true", "yes", "on")
 setup_logger("TTS", level=logging.INFO, stream=sys.stdout, formatter=ConsoleFormatter())
 
 
@@ -140,15 +189,24 @@ def style_wav_uri_to_dict(style_wav: str) -> str | dict:
 
 @app.route("/")
 def index():
+    speaker_ids = api.speakers
+    speaker_labels = {}
+    if speaker_ids and not _use_all_speakers():
+        curated = [(sid, label) for sid, label in CURATED_SPEAKERS if sid in speaker_ids]
+        if curated:
+            speaker_ids = [sid for sid, _ in curated]
+            speaker_labels = dict(curated)
     return render_template(
         "index.html",
         show_details=args.show_details,
         use_multi_speaker=api.is_multi_speaker,
         use_multi_language=api.is_multi_lingual,
-        speaker_ids=api.speakers,
+        speaker_ids=speaker_ids,
+        speaker_labels=speaker_labels,
         language_ids=api.languages,
         use_gst=use_gst,
         supports_cloning=api.synthesizer.tts_config.supports_cloning,
+        telugu_enabled=TELUGU_ENABLED and TeluguTTS is not None,
     )
 
 
@@ -203,6 +261,25 @@ def tts():
         # Basic validation
         if not text.strip():
             return {"error": "Text parameter is required"}, 400
+
+        # Telugu (తెలుగు) is served by a separate backend, since Coqui has no
+        # Telugu model. Everything else falls through to the Coqui model below.
+        lang = (request.headers.get("lang") or request.values.get("lang", "en") or "en").strip().lower()
+        if lang in ("te", "tel", "telugu"):
+            telugu = get_telugu()
+            if telugu is None:
+                return {"error": "Telugu support is not available on this server."}, 503
+            try:
+                wav, sample_rate = telugu.synthesize(text, speed)
+            except ValueError as e:
+                return {"error": str(e)}, 400
+            except Exception as e:
+                logger.exception("Telugu synthesis failed")
+                return {"error": f"Telugu synthesis failed: {e!s}"}, 500
+            out = io.BytesIO()
+            sf.write(out, wav, sample_rate, format="WAV", subtype="PCM_16")
+            out.seek(0)
+            return send_file(out, mimetype="audio/wav")
 
         logger.info("Model input: %s", text)
         logger.info("Speaker idx: %s", speaker_idx)
@@ -313,6 +390,7 @@ def openai_tts():
     fmt = payload.get("response_format", "mp3").lower()  # OpenAI default is .mp3
     speed = payload.get("speed", 1.0)
     language_idx = args.language_idx if api.is_multi_lingual else None
+    lang = str(payload.get("language", "en")).strip().lower()
 
     speaker_wav = None
     if speaker_idx is not None:
@@ -343,10 +421,22 @@ def openai_tts():
         logger.info("Speaker wav: %s", speaker_wav)
         logger.info("Language idx: %s", language_idx)
 
-        wavs = api.tts(text, speaker=speaker_idx, language=language_idx, speaker_wav=speaker_wav, speed=speed)
-        out = io.BytesIO()
-        api.synthesizer.save_wav(wavs, out)
-        out.seek(0)
+        if lang in ("te", "tel", "telugu"):
+            telugu = get_telugu()
+            if telugu is None:
+                return {"error": "Telugu support is not available on this server."}, 503
+            try:
+                wav, sample_rate = telugu.synthesize(text, speed)
+            except ValueError as e:
+                return {"error": str(e)}, 400
+            out = io.BytesIO()
+            sf.write(out, wav, sample_rate, format="WAV", subtype="PCM_16")
+            out.seek(0)
+        else:
+            wavs = api.tts(text, speaker=speaker_idx, language=language_idx, speaker_wav=speaker_wav, speed=speed)
+            out = io.BytesIO()
+            api.synthesizer.save_wav(wavs, out)
+            out.seek(0)
         waveform, sample_rate = torchaudio.load(out)
 
         mimetypes = {

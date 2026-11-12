@@ -8,3 +8,15 @@ six
 #   pip install torch==2.4.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu121
 torch==2.4.1
 torchaudio==2.4.1
+
+# --- Telugu (తెలుగు) support ------------------------------------------------
+# The Telugu voice (facebook/mms-tts-tel) and the optional IndicF5 engine run on
+# Hugging Face transformers. These pins keep it compatible with torch 2.4.1:
+# transformers 5.x requires torch>=2.6, which would break the CUDA 12.1 build.
+transformers==4.57.1
+huggingface-hub==0.36.2
+tokenizers==0.22.2
+# Writing the synthesized WAV.
+soundfile>=0.12
+# Optional: pitch-preserving speed changes for the IndicF5 engine.
+librosa>=0.10

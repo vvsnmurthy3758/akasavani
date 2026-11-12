@@ -5,10 +5,12 @@ HOW TO START AKASAVANI
 2. Double-click:       Start Web UI.bat
 3. A black window opens and your browser opens by itself.
    (If it doesn't open, go to:  http://localhost:5002 )
-4. Type some text, pick a voice, click Speak.
+4. Type some text, pick a language (English or Telugu), click Speak.
 5. SPEED: use the "Speed" slider under the text box.
    0 = slowest, 1 = normal, 3 = fastest. Move it, then click Speak.
-6. To stop: close the black window, or press Ctrl+C in it.
+6. TELUGU: choose "తెలుగు (Telugu)" in the Language box. The first time
+   you use it, it downloads a Telugu voice (~145 MB) - after that it is fast.
+7. To stop: close the black window, or press Ctrl+C in it.
 
 That's all. The first time takes longer because it downloads the voice model.
 Every time after that, it starts fast.
@@ -24,6 +26,10 @@ commands (run them in the akasavani folder):
   uv venv --python 3.11 ".venv"
   uv pip install --python ".venv\Scripts\python.exe" torch==2.4.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu121
   uv pip install --python ".venv\Scripts\python.exe" "coqui-tts[server]" six
+  uv pip install --python ".venv\Scripts\python.exe" transformers==4.57.1 huggingface-hub==0.36.2 tokenizers==0.22.2 soundfile librosa
+
+(transformers must stay on the 4.x line: version 5 needs torch 2.6, which
+would break the CUDA 12.1 build above.)
 
 Then also install espeak-ng (needed by the vctk/vits voice model):
 

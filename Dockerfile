@@ -1,4 +1,4 @@
-# Coqui TTS Web UI - container image (CPU by default)
+# Akasavani - local text-to-speech web UI (container image, CPU by default)
 FROM python:3.11-slim
 
 # espeak-ng is required by several Coqui models (e.g. tts_models/en/vctk/vits).

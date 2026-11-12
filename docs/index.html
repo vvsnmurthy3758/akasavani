@@ -33,22 +33,23 @@
         <p class="eyebrow">आकाशवाणी · “voice from the sky” · runs on your own machine</p>
         <h1>Text to speech,<br />with a speed slider.</h1>
         <p class="lead">
-          <strong>Akasavani</strong> is a friendly local web UI for Coqui TTS.
-          Type your text, choose a voice, set the speed from <strong>0 to 3×</strong>,
-          and hear it instantly — all on your own hardware. No cloud, no per-character fees.
+          <strong>Akasavani</strong> is a friendly local web UI for text-to-speech.
+          Type your text, pick <strong>English</strong> or <strong>తెలుగు (Telugu)</strong>,
+          set the speed from <strong>0 to 3×</strong>, and hear it instantly — all on your
+          own hardware. No cloud, no per-character fees.
         </p>
         <div class="cta">
           <a class="btn btn-primary" href="https://github.com/vvsnmurthy3758/akasavani" target="_blank" rel="noopener">Get the code</a>
           <a class="btn btn-ghost" href="#run">Run it in 2 minutes</a>
         </div>
-        <p class="note">🔒 Runs offline · 🎚️ Speed 0–3× · 🔊 Multi-voice · 🐳 Docker ready</p>
+        <p class="note">🔒 Runs offline · 🎚️ Speed 0–3× · 🗣️ English &amp; తెలుగు · 🐳 Docker ready</p>
       </div>
     </section>
 
     <section id="demo" class="section">
       <div class="wrap">
         <h2>Listen to it</h2>
-        <p class="muted">These clips were generated locally with the <code>tts_models/en/vctk/vits</code> model. Same sentence, different voices and speeds.</p>
+        <p class="muted">These clips were generated locally — English with the <code>tts_models/en/vctk/vits</code> model, Telugu with <code>facebook/mms-tts-tel</code>. Same speed slider throughout.</p>
         <div class="samples">
           <figure class="sample">
             <figcaption>Normal · 1.0×</figcaption>
@@ -66,6 +67,14 @@
             <figcaption>A different voice · 1.0×</figcaption>
             <audio controls preload="none" src="assets/sample-voice2.mp3"></audio>
           </figure>
+          <figure class="sample">
+            <figcaption>తెలుగు (Telugu) · 1.0×</figcaption>
+            <audio controls preload="none" src="assets/sample-telugu.mp3"></audio>
+          </figure>
+          <figure class="sample">
+            <figcaption>తెలుగు (Telugu) · 0.75×</figcaption>
+            <audio controls preload="none" src="assets/sample-telugu-slow.mp3"></audio>
+          </figure>
         </div>
       </div>
     </section>
@@ -77,6 +86,13 @@
 
         <div class="mock">
           <div class="mock-title">🗣️ Akasavani</div>
+
+          <label class="mock-label" for="mock-lang">Language</label>
+          <select id="mock-lang" class="mock-input">
+            <option value="en">English</option>
+            <option value="te">తెలుగు (Telugu)</option>
+          </select>
+
           <label class="mock-label" for="mock-text">Text</label>
           <input id="mock-text" class="mock-input" type="text" value="Hi there. I am a local text to speech assistant." />
 
@@ -85,11 +101,13 @@
             <span id="mock-status" class="mock-status"></span>
           </div>
 
-          <label class="mock-label" for="mock-speaker">Voice</label>
-          <select id="mock-speaker" class="mock-input">
-            <option value="p225">p225 — voice A</option>
-            <option value="p376">p376 — voice B</option>
-          </select>
+          <div id="mock-en-voice">
+            <label class="mock-label" for="mock-speaker">Voice</label>
+            <select id="mock-speaker" class="mock-input">
+              <option value="a">Female 1</option>
+              <option value="b">A different voice</option>
+            </select>
+          </div>
 
           <label class="mock-label" for="mock-speed">Speed</label>
           <div class="mock-row">
@@ -107,7 +125,7 @@
         <h2>Features</h2>
         <div class="grid">
           <div class="card"><h3>🎚️ Speed 0–3×</h3><p>Slow down fast talkers or speed up long reads. The slider maps to the model's length scale, so it works for VITS and XTTS.</p></div>
-          <div class="card"><h3>🔊 Multiple voices</h3><p>Ships with the multi-speaker <code>vctk/vits</code> model — dozens of English voices to choose from.</p></div>
+          <div class="card"><h3>🗣️ English &amp; తెలుగు</h3><p>A short, curated set of English voices from <code>vctk/vits</code>, plus native <strong>Telugu</strong> synthesis — switch language from one dropdown.</p></div>
           <div class="card"><h3>🖱️ One double-click</h3><p>On Windows, <code>Start Web UI.bat</code> boots the server and opens your browser. Nothing else to configure.</p></div>
           <div class="card"><h3>🔒 100% local</h3><p>Your text never leaves your machine. No API keys, no accounts, no usage limits.</p></div>
           <div class="card"><h3>🧩 Clean REST API</h3><p>Also exposes an OpenAI-compatible <code>/v1/audio/speech</code> endpoint, so you can script it.</p></div>
@@ -151,6 +169,8 @@ tts-server --model_name tts_models/en/vctk/vits --port 5002</code></pre>
           <li><strong>This project</strong> — MPL-2.0. Built on the maintained <em>Idiap</em> fork of Coqui TTS.</li>
           <li><strong>Coqui TTS code</strong> — MPL-2.0 (<code>idiap/coqui-ai-TTS</code>).</li>
           <li><strong><code>vctk/vits</code> model</strong> — Apache-2.0 (commercial use OK).</li>
+          <li><strong>MMS-TTS Telugu</strong> (<code>facebook/mms-tts-tel</code>) — CC-BY-NC-4.0 (non-commercial).</li>
+          <li><strong>IndicF5</strong> (optional Telugu engine) — MIT.</li>
           <li><strong>XTTS-v2</strong> (if you add voice cloning) — non-commercial only.</li>
         </ul>
       </div>
@@ -159,7 +179,7 @@ tts-server --model_name tts_models/en/vctk/vits --port 5002</code></pre>
 
   <footer class="footer">
     <div class="wrap">
-      <span>Akasavani — built with Coqui TTS. Runs on your machine.</span>
+      <span>Akasavani — built with Coqui TTS &amp; MMS. Runs on your machine.</span>
       <a href="https://github.com/vvsnmurthy3758/akasavani" target="_blank" rel="noopener">View on GitHub ↗</a>
     </div>
   </footer>

@@ -68,14 +68,17 @@
                 <h1 class="brand-title">Akasavani</h1>
                 <p class="brand-sub">आकाशवाणी · “voice from the sky” · runs on your machine</p>
 
+                {%if telugu_enabled%}
+                Language:
+                <select id="lang" name="lang" onchange="onLanguageChange()">
+                    <option value="en" SELECTED>English</option>
+                    <option value="te">తెలుగు (Telugu)</option>
+                </select><br /><br />
+                {%endif%}
+
                 {%if use_gst%}
                 <input value='{"0": 0.1}' id="style_wav" placeholder="style wav (dict or path to wav).." size=45
                     type="text" name="style_wav"><br /><br />
-                {%endif%}
-
-                {%if supports_cloning%}
-                Reference audio:
-                <input id="speaker_wav" placeholder="path/to/speaker.wav" name="speaker_wav" accept=".wav"><br /><br />
                 {%endif%}
 
                 <input id="text" placeholder="Type here..." size=45 type="text" name="text">
@@ -86,14 +89,21 @@
                     oninput="q('#speed-value').textContent = Number(q('#speed').value).toFixed(2) + 'x'">
                 <span id="speed-value" class="speed-badge">1.00x</span><br /><br />
 
-                {%if use_multi_speaker%}
-                Choose a speaker:
-                <select id="speaker_id" name=speaker_id method="GET" action="/">
-                    {% for speaker_id in speaker_ids %}
-                    <option value="{{speaker_id}}" SELECTED>{{speaker_id}}</option>
-                    {% endfor %}
-                </select><br /><br />
-                {%endif%}
+                <span id="english-options">
+                    {%if supports_cloning%}
+                    Reference audio:
+                    <input id="speaker_wav" placeholder="path/to/speaker.wav" name="speaker_wav" accept=".wav"><br /><br />
+                    {%endif%}
+
+                    {%if use_multi_speaker%}
+                    Choose a voice:
+                    <select id="speaker_id" name=speaker_id method="GET" action="/">
+                        {% for speaker_id in speaker_ids %}
+                        <option value="{{speaker_id}}" {% if loop.first %}SELECTED{% endif %}>{{ speaker_labels.get(speaker_id, speaker_id) }}</option>
+                        {% endfor %}
+                    </select><br /><br />
+                    {%endif%}
+                </span>
 
                 {%if use_multi_language%}
                 Choose a language:
@@ -130,7 +140,15 @@
             return ""
         }
         function q(selector) { return document.querySelector(selector) }
+        function onLanguageChange() {
+            const lang = getTextValue('#lang') || 'en'
+            const box = q('#english-options')
+            if (box) {
+                box.style.display = (lang === 'te') ? 'none' : ''
+            }
+        }
         q('#text').focus()
+        onLanguageChange()
         function do_tts(e) {
             const text = q('#text').value
             const style_wav = getTextValue('#style_wav')
@@ -140,12 +158,13 @@
                 speaker_id = ''
             }
             const language_id = getTextValue('#language_id')
+            const lang = getTextValue('#lang') || 'en'
             const speed = getTextValue('#speed') || 1
             if (text) {
                 q('#message').textContent = 'Synthesizing...'
                 q('#speak-button').disabled = true
                 q('#audio').hidden = true
-                synthesize(text, speaker_id, style_wav, speaker_wav, language_id, speed)
+                synthesize(text, speaker_id, style_wav, speaker_wav, language_id, speed, lang)
             }
             e.preventDefault()
             return false
@@ -156,10 +175,16 @@
                 do_tts(e)
             }
         })
-        function synthesize(text, speaker_id = "", style_wav = "", speaker_wav = "", language_id = "", speed = 1) {
-            fetch(`/api/tts?text=${encodeURIComponent(text)}&speaker_id=${encodeURIComponent(speaker_id)}&style_wav=${encodeURIComponent(style_wav)}&speaker_wav=${encodeURIComponent(speaker_wav)}&language_id=${encodeURIComponent(language_id)}&speed=${encodeURIComponent(speed)}`, { cache: 'no-cache' })
+        function synthesize(text, speaker_id = "", style_wav = "", speaker_wav = "", language_id = "", speed = 1, lang = "en") {
+            fetch(`/api/tts?text=${encodeURIComponent(text)}&speaker_id=${encodeURIComponent(speaker_id)}&style_wav=${encodeURIComponent(style_wav)}&speaker_wav=${encodeURIComponent(speaker_wav)}&language_id=${encodeURIComponent(language_id)}&speed=${encodeURIComponent(speed)}&lang=${encodeURIComponent(lang)}`, { cache: 'no-cache' })
                 .then(function (res) {
-                    if (!res.ok) throw Error(res.statusText)
+                    if (!res.ok) {
+                        return res.text().then(function (body) {
+                            var msg = res.statusText
+                            try { msg = JSON.parse(body).error || msg } catch (e) { /* not JSON */ }
+                            throw Error(msg)
+                        })
+                    }
                     return res.blob()
                 }).then(function (blob) {
                     q('#message').textContent = ''

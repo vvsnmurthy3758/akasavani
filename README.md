@@ -25,7 +25,7 @@ No cloud, no API keys, no per-character fees.
 ## ✨ Features
 
 - **🎚️ Speed control (0–3×)** — slow down fast talkers or speed up long reads. Maps to the model's length scale, so it works for VITS *and* XTTS.
-- **🔊 Multiple voices** — ships with the multi-speaker `tts_models/en/vctk/vits` model (dozens of English voices).
+- **🗣️ English & తెలుగు (Telugu)** — a curated set of English voices from `tts_models/en/vctk/vits`, plus native **Telugu** synthesis, picked from a single dropdown. Set `AKASAVANI_ALL_SPEAKERS=1` to unlock all ~109 English voices.
 - **🖱️ One double-click** (Windows) — `Start Web UI.bat` starts the server and opens your browser.
 - **🔒 100% local** — your text never leaves your machine.
 - **🧩 REST API** — includes an OpenAI-compatible `/v1/audio/speech` endpoint for scripting.
@@ -89,6 +89,43 @@ The chosen value is sent to the server as `speed`. For models that don't accept 
 
 ---
 
+## 🗣️ English & తెలుగు (Telugu)
+
+The web UI has a **Language** dropdown:
+
+| Language | Engine | Notes |
+|----------|--------|-------|
+| English | Coqui `tts_models/en/vctk/vits` | 10 curated voices (all ~109 with `AKASAVANI_ALL_SPEAKERS=1`) |
+| తెలుగు (Telugu) | `facebook/mms-tts-tel` | Single voice, ~145 MB, no login required |
+
+> **Why a second engine?** Coqui's model zoo has **no Telugu model**, so Telugu is
+> served by a small backend in [`patches/telugu_tts.py`](patches/telugu_tts.py) that
+> runs on Hugging Face `transformers`. The first Telugu request downloads the voice
+> (~145 MB); after that it is fully offline. The speed slider works for Telugu too.
+
+### Optional: the IndicF5 engine (best quality)
+
+[`ai4bharat/IndicF5`](https://huggingface.co/ai4bharat/IndicF5) produces the most
+natural Telugu, but it is a **gated** voice-cloning model and needs a reference clip:
+
+1. Log in to Hugging Face and **accept the terms** at <https://huggingface.co/ai4bharat/IndicF5>.
+2. Run `huggingface-cli login` (or set the `HF_TOKEN` environment variable).
+3. Point the app at a short Telugu clip and its exact transcript:
+
+   ```bat
+   set AKASAVANI_TELUGU_ENGINE=indicf5
+   set INDICF5_REF_AUDIO=C:\path\to\telugu_reference.wav
+   set INDICF5_REF_TEXT=మీ రిఫరెన్స్ ఆడియోలో ఉన్న వాక్యం
+   ```
+
+4. Restart the UI.
+
+With `AKASAVANI_TELUGU_ENGINE=auto` (the default), Akasavani uses IndicF5 whenever a
+reference clip, its transcript **and** a Hugging Face token are all present, and
+otherwise falls back to the always-available MMS voice.
+
+---
+
 ## 🧩 REST API
 
 Beyond the web UI, the server exposes an OpenAI-compatible endpoint:
@@ -102,6 +139,8 @@ curl -X POST http://localhost:5002/v1/audio/speech \
 
 Supported `response_format`: `wav`, `mp3`, `opus`, `aac`, `flac`, `pcm`.
 
+Add `"language": "te"` to speak Telugu (default is `"en"`).
+
 ---
 
 ## 📁 Project layout
@@ -110,7 +149,7 @@ Supported `response_format`: `wav`, `mp3`, `opus`, `aac`, `flac`, `pcm`.
 ├── Start Web UI.bat        # Windows one-click launcher
 ├── start_webui.py          # starts server, waits, opens browser, applies patch
 ├── speak.py                # small command-line TTS helper
-├── patches/                # patched server.py + index.html (the speed slider)
+├── patches/                # patched server.py + index.html (speed slider) + telugu_tts.py
 ├── docs/                   # GitHub Pages landing site (+ demo audio)
 ├── Dockerfile              # container image
 ├── docker-compose.yml
@@ -129,6 +168,11 @@ Copy `.env.example` to `.env` and adjust:
 | `MODEL_NAME` | `tts_models/en/vctk/vits` | Coqui model to load |
 | `PORT` | `5002` | HTTP port |
 | `COQUI_TOS_AGREED` | `1` | Accept Coqui model terms (required non-interactively) |
+| `AKASAVANI_TELUGU` | `1` | Enable the Telugu option in the UI |
+| `AKASAVANI_TELUGU_ENGINE` | `auto` | `auto`, `mms` or `indicf5` |
+| `AKASAVANI_ALL_SPEAKERS` | *(unset)* | `1` shows all ~109 English voices |
+| `INDICF5_REF_AUDIO` | *(unset)* | Reference clip for the IndicF5 engine |
+| `INDICF5_REF_TEXT` | *(unset)* | Transcript of that reference clip |
 
 ---
 
@@ -137,6 +181,8 @@ Copy `.env.example` to `.env` and adjust:
 - **This project:** MPL-2.0 — see [LICENSE](LICENSE).
 - **Coqui TTS code:** MPL-2.0, maintained fork by the Idiap Research Institute (`idiap/coqui-ai-TTS`).
 - **`vctk/vits` model:** Apache-2.0 (commercial use OK).
+- **MMS-TTS Telugu** (`facebook/mms-tts-tel`): CC-BY-NC-4.0 (non-commercial).
+- **IndicF5** (optional Telugu engine): MIT.
 - **XTTS-v2** (if you add voice cloning): non-commercial only (Coqui Public Model License).
 - The files in `patches/` are modified from Coqui TTS and remain under MPL-2.0.
 

@@ -27,6 +27,7 @@ SITE = HERE / ".venv" / "Lib" / "site-packages" / "TTS" / "server"
 PATCH_TARGETS = {
     HERE / "patches" / "server.py": SITE / "server.py",
     HERE / "patches" / "index.html": SITE / "templates" / "index.html",
+    HERE / "patches" / "telugu_tts.py": SITE / "telugu_tts.py",
     HERE / "patches" / "logo.png": SITE / "static" / "logo.png",
 }
 
@@ -85,10 +86,11 @@ def apply_patches():
 
 def main() -> int:
     print("=" * 58)
-    print("  Coqui TTS  -  local web UI")
+    print("  Akasavani  -  local text-to-speech web UI")
     print("=" * 58)
-    print(f"  Model: {MODEL}")
-    print(f"  Page : {URL}")
+    print(f"  Model : {MODEL}")
+    print(f"  Page  : {URL}")
+    print("  Voices: English + Telugu (తెలుగు)")
     print()
     print("Starting the server...")
     print("(First time only: it downloads the voice model. Please wait.)")

@@ -5,6 +5,7 @@ set -euo pipefail
 SITE="$(python -c 'import os, TTS.server; print(os.path.dirname(TTS.server.__file__))')"
 cp /app/patches/server.py "${SITE}/server.py"
 cp /app/patches/index.html "${SITE}/templates/index.html"
+cp /app/patches/telugu_tts.py "${SITE}/telugu_tts.py"
 cp /app/patches/logo.png "${SITE}/static/logo.png"
 
 echo "Starting TTS server (model=${MODEL_NAME:-tts_models/en/vctk/vits}, port=${PORT:-5002})"
