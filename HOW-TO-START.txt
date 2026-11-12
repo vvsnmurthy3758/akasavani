@@ -1,0 +1,38 @@
+HOW TO START THE COQUI TTS WEB UI
+=================================
+
+1. Open this folder:   D:\svb01\coqui-tts
+2. Double-click:       Start Web UI.bat
+3. A black window opens and your browser opens by itself.
+   (If it doesn't open, go to:  http://localhost:5002 )
+4. Type some text, pick a voice, click Speak.
+5. SPEED: use the "Speed" slider under the text box.
+   0 = slowest, 1 = normal, 3 = fastest. Move it, then click Speak.
+6. To stop: close the black window, or press Ctrl+C in it.
+
+That's all. The first time takes longer because it downloads the voice model.
+Every time after that, it starts fast.
+
+
+------------------------------------------------------------
+IF THE FOLDER IS MOVED OR THE ENVIRONMENT IS MISSING
+------------------------------------------------------------
+The big ".venv" folder is NOT inside this backup (it was 4.79 GB and does
+not move between computers). If it is missing, rebuild it once with these
+commands (run them in the coqui-tts folder):
+
+  uv venv --python 3.11 ".venv"
+  uv pip install --python ".venv\Scripts\python.exe" torch==2.4.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu121
+  uv pip install --python ".venv\Scripts\python.exe" "coqui-tts[server]" six
+
+Then also install espeak-ng (needed by the vctk/vits voice model):
+
+  winget install eSpeak-NG.eSpeak-NG
+
+ABOUT THE SPEED SLIDER
+After rebuilding, the "Speed" slider comes from the "patches" folder next to
+this file. You don't have to do anything: start_webui.py copies the patched
+server.py and index.html into the .venv every time it starts, so the slider
+always works. (Keep the "patches" folder with this backup.)
+
+Full details are in README.md.

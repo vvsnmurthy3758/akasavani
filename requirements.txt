@@ -1,0 +1,10 @@
+# Coqui TTS (maintained Idiap fork) + its web server
+coqui-tts[server]==0.28.0
+# The fork forgot to declare `six`, but the server needs it.
+six
+
+# PyTorch. `pip install -r requirements.txt` gives you the CPU build from PyPI.
+# For an NVIDIA GPU (CUDA 12.1), install PyTorch from the CUDA index instead:
+#   pip install torch==2.4.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu121
+torch==2.4.1
+torchaudio==2.4.1
